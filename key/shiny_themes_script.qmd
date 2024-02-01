@@ -1,0 +1,166 @@
+---
+title: "Customizing your Shiny App - Bootswatch themes!"
+author: "Casey O'Hara"
+format: 
+  html:
+    toc: true
+    embed-resources: true
+editor: visual
+---
+
+# Setup
+
+## Required packages:
+
+* `shiny`
+* `bslib`
+* `tidyverse`
+* `palmerpenguins`
+
+
+# Update the basic penguins plot app!
+
+## Add a new button and output
+
+(@) In the UI, add a new widget and output in the sidebar.
+
+```r
+<other code above>
+
+ui <- fluidPage(
+  titlePanel('I am adding a title!'),
+  sidebarLayout(
+    sidebarPanel("put my widgets here",
+    
+      actionButton(inputId = 'dice_button', label = 'Lucky?', icon = icon('dice')), # <1>
+      
+      textOutput(outputId = 'diceroll'), # <2>
+
+      <radiobuttons here>
+      
+<other code below>
+```
+1. `icon()` inserts a graphic icon from either the Font Awesome set or Bootstrap Glyphicon set.  You can use these in action buttons, tabPanels, and navbarMenus (probably elsewhere too).  See ?icon for more details! 
+2. We haven't created this output yet!
+
+(@) In the server, we'll create an output that reacts to the action button.
+
+```r
+<other code above>
+
+server <- function(input, output) {
+  
+  output$diceroll <- reactive({
+    x <- input$dice_button # <1>
+    rolls <- sample(1:6, n = 2, replace = TRUE) ### simulate two dice
+    txt_out <- sprintf('Die 1: %s, die 2: %s, total = %s', rolls[1], rolls[2], sum(rolls))
+  })
+  
+  <penguin_select reactive and other stuff down here>
+
+<other code below>
+```
+1. Note, we aren't actually doing anything with the value of the button!  But if we include it here, anything the value changes (when someone clicks it), then this reactive will be triggered.
+
+(@) In the main panel, let's add a few lines to see how the look changes when we modify the theme later.
+
+```r
+<other code above>
+
+    mainPanel(
+              
+      h2('This is our heading font'),
+      p('Regular body text looks like this, and '),
+      code('here is some code text!'),
+      
+<other code below>
+```
+
+(@) Run the app, test the button.  Cool, it works!
+
+## Add a theme!
+
+(@) Let's go to [Google Fonts](https://fonts.google.com) and choose a few we like - something very distinctive so it will be obvious when we change it in the app!  How about "Zilla Slab" for a serif font perhaps for body text, "Syne Mono" for monospaced (code) font, and "Montserrat Alternates" for a sans-serif font - maybe for headers.  Feel free to choose your own favorites, and write the full name down.
+
+    * Note on fonts - a good rule of thumb is to use serif fonts for body text (base_font), sans-serif for headings (heading_font), and monospace for code_font.  These fonts we chose will probably look stupid in a real app, here we're just messing around to see the effects!
+
+
+(@) Let's add a new theme!  Bootswatch is a set of themes and tools for customizing websites and apps, using the Bootstrap framework.  Check out the pre-defined options at https://bootswatch.com, and choose one to change the appearance of our app.  
+    * Pick a bold one for now, so changes are obvious!  Let's try Vapor.  
+    * To add a theme, we have to use `library(bslib)` to make the themes available.  
+    * Then, at the top of our user interface, we can set the theme using `bs_theme()`.
+    * Here's a link to a lot more detail about [Bootswatch theming](https://rstudio.github.io/bslib/articles/theming/) including many helpful design tips! 
+
+
+```r
+library(shiny)
+library(bslib)
+library(tidyverse)
+library(palmerpenguins)
+
+### Create the user interface
+
+ui <- fluidPage(
+  theme = bs_theme(bootswatch = 'vapor'),
+
+  <titlePanel here>
+
+<other code below>
+
+```
+
+(@) Now run the app and see the updated theme!  But even better: we can quickly preview many themes!
+
+## Add a theme selector (temporarily!)
+
+(@) In the server, add `bs_themer()` to create a theme selector.
+
+```r
+<other code above>
+
+server <- function(input, output) {
+  
+  bs_themer()
+
+<other code below>
+
+```
+
+(@) Run the app, then choose different base themes, mess around with foreground and background color.  Change the accent colors.  Get your app to an appearance that you like (at least for now).  Note with colors, there are many ways to choose them - but for here, try choosing a foreground and background that are similar hues (e.g., both reds, both greens), but with high contrast (one light, one dark).
+
+(@) Let's also play with fonts!  Remember I chose "Zilla Slab" for a serif font for body text, "Syne Mono" for monospaced (code) font, and "Montserrat Alternates" for a sans-serif font for headers. Change the base font, heading font, and code font options to suit your preferences.
+
+(@) Finally, notice what is happening in the console of your R Studio window: `bs_theme_update()`!  Once you like how your app looks, we can copy this and use it to set our theme permanently.
+
+## Set a custom theme for the app
+
+(@) Let's go back and remove the `bs_themer()` from the server - it was only there to help us determine our final theme.
+
+(@) Above our UI, let's write a bit of code to define our custom theme, and then set the theme inside the UI to our new theme:
+
+```r
+<library stuff up here>
+
+my_theme <- bs_theme(bootswatch = 'vapor') %>%
+  bs_theme_update(bg = "rgb(235, 175, 175)", fg = "rgb(63, 11, 11)",      #<1>
+    primary = "#B5C142", secondary = "#575155", info = "#103851", 
+    base_font = font_google("Zilla Slab"), code_font = font_google("Syne Mono"), 
+    heading_font = font_google("Montserrat Alternates"), font_scale = 1.3)
+    
+### Create the user interface
+
+ui <- fluidPage(
+  theme = my_theme,
+
+<other code below>
+
+```
+1. Note: the first argument of `bs_theme_update` is an existing theme.  We are piping in `bs_theme()` so we need to delete that first argument (`theme`) in the code we copied out of the console!
+
+
+# Wrap up!
+
+This Bootswatch method is an easy way to quickly and dramatically change the appearance of your Shiny app.  Have fun playing around with it!  While we are not graphic designers and this is not a graphic design class, PLEASE think carefully about your choices of fonts, colors, and styles so your Shiny app has at least a veneer of professionalism.
+
+For even more detailed control, we can use Cascading Style Sheets (CSS) to set the color, size, font, etc of every single element in our app.  That will be a different video tutorial!
+
