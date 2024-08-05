@@ -5,9 +5,9 @@ library(bslib)
 library(tidyverse)
 library(palmerpenguins)
 
-my_theme <- bs_theme(bootswatch = 'minty') %>%
-  bs_theme_update(bg = "rgb(242, 206, 206)", fg = "rgb(93, 13, 13)", 
-                  primary = "#7883C2", secondary = "#9EF396", base_font = font_google("Zilla Slab"), 
+my_theme <- bs_theme(bootswatch = 'vapor') %>%
+  bs_theme_update(bg = "rgb(240, 218, 218)", fg = "rgb(54, 10, 10)", 
+                  secondary = "#066D19", base_font = font_google("Zilla Slab"), 
                   code_font = font_google("Syne Mono"), heading_font = font_google("Montserrat Alternates"), 
                   font_scale = NULL)
 
@@ -18,12 +18,12 @@ ui <- fluidPage(
   
   titlePanel('I am adding a title!'),
   sidebarLayout(
-    sidebarPanel("put my widgets here",
-                 
+    sidebarPanel(
+      
       actionButton(inputId = 'dice_button', label = 'Lucky?', icon = icon('dice')),
       
-      textOutput(outputId = 'diceroll'), 
-
+      textOutput(outputId = 'diceroll'),
+      
       radioButtons(
         inputId = "penguin_species",
         label = "Choose penguin species",
@@ -41,7 +41,6 @@ ui <- fluidPage(
     ), ### end of sidebarPanel
     
     mainPanel(
-      
       h2('This is our heading font'),
       p('Regular body text looks like this, and...'),
       code('here is some code-formatted text!'),
@@ -66,7 +65,7 @@ server <- function(input, output) {
   output$diceroll <- reactive({
     x <- input$dice_button
     rolls <- sample(1:6, size = 2, replace = TRUE)
-    txt_out <- sprintf('Die 1: %s, die 2: %s, total = %s', rolls[1], rolls[2], sum(rolls))
+    txt_out <- sprintf('Die 1: %s, die 2: %s, total: %s', rolls[1], rolls[2], sum(rolls))
     return(txt_out)
   })
   
